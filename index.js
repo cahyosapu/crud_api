@@ -5,38 +5,38 @@ const fastify = require('fastify')({
 const db = require('./db');
  
 fastify.get('/books/:search', async (request, reply) => {
-    const books = await db.query("select sku, judul from books where harga = 90000", [
+    const books = await db.query("select sku, judul from books where sku like $1", [
       `%${request.params.search}%`
       ]);
     return books;
   })
  
 fastify.get('/books', async (request, reply) => {
-    const books = await db.query("select * from books", [
+    const books = await db.query("select * from books where sku = $1", [
       `%${request.query.search}%`
       ]);
     return books;
   })
  
-fastify.post('/books', async (request, reply) => {
-    const books = await db.query("insert into books (sku, judul, harga, stock) VALUES ('asd', 'laskarpelangi', 50000, 100)", [
-      `%${request.body.search}%`
-      ]);
-    return books;
+fastify.post('/books/:idBooks', async (request, reply) => {
+    const addBooks = request.body;
+    const books = await db.query("INSERT INTO books (sku, judul, harga, stock) VALUES ('${addBooks.sku}','${addBooks.judul}','${addBooks.harga}','${addBooks.stock}');")
+    return ("Sukses");
   })
  
-fastify.put('/books', async (request, reply) => {
-    const books = await db.query("update books set judul='KARLMAX' where book_id=2", [
+fastify.put('/books/:idBooks', async (request, reply) => {
+    const updateBooks = request.body;
+    const books = await db.query("UPDATE books SET judul = '${updateBooks.judul}' WHERE judul = $1", [
       `%${request.body.search}%`
       ]);
-    return books;
+    return ("Updated" + request.params.search);
   })
  
-fastify.delete('/books', async (request, reply) => {
-    const books = await db.query("delete from books where book_id=6", [
+fastify.delete('/books/:search', async (request, reply) => {
+    const books = await db.query("DELETE books WHERE sku = $1", [
       `%${request.body.search}%`
       ]);
-    return books;
+    return ("Deleted" + request.params.search);
   })
  
 const start = async () => {
